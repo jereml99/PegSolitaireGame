@@ -126,10 +126,6 @@ namespace PegSolitaireGame
             {
                 InitButtonMap();
             }
-            else
-            {
-                SaveState();
-            }
         }
 
         private void SetAvailableFields()
