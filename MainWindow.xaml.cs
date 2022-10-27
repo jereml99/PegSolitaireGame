@@ -27,5 +27,10 @@ namespace PegSolitaireGame
             InitializeComponent();
             MyBoard.InitBoard(BoardSize);
         }
+
+        private void OnStepBack(object sender, RoutedEventArgs e)
+        {
+            MyBoard.StepBack();
+        }
     }
 }

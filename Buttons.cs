@@ -9,10 +9,17 @@ using System.Windows.Media;
 
 namespace PegSolitaireGame
 {
+    enum TypeChar
+    {
+        EmptyButton = 'e',
+        PawnButton = 'p',
+        Selected = 's',
+        AvailableField = 'a',
+        Nothing = 'n',
+    }
     public abstract class GameButton : Button
     {
         protected Board Board;
-
         protected GameButton(Board board)
         {
             this.Board = board;
@@ -25,9 +32,9 @@ namespace PegSolitaireGame
 
         public virtual void Handle()
         {
-            return;
         }
 
+        public abstract char GetChar();
         public Point GetPoint()
         {
             return new Point(Grid.GetRow(this), Grid.GetColumn(this));
@@ -45,6 +52,11 @@ namespace PegSolitaireGame
         {
             Background = Brushes.AliceBlue;
             Style = FindResource("Peg") as Style;
+        }
+
+        public override char GetChar()
+        {
+            return (char)TypeChar.EmptyButton;
         }
     }
 
@@ -64,10 +76,16 @@ namespace PegSolitaireGame
 
         public override void Handle()
         {
+            Board.SaveState();
             var newButton = Board.ChangeState(this, new SelectedPawnButton(Board));
             Board.RemoveBetweenSelectedAnd(newButton);
             Board.SetSelected(newButton, emptySelected: true);
             Board.checkIfEnd();
+        }
+
+        public override char GetChar()
+        {
+            return (char) TypeChar.AvailableField;
         }
     }
 
@@ -89,6 +107,11 @@ namespace PegSolitaireGame
             var newButton = Board.ChangeState(this, new SelectedPawnButton(Board));
             Board.SetSelected(newButton);
         }
+
+        public override char GetChar()
+        {
+            return (char) TypeChar.PawnButton;
+        }
     }
     public class SelectedPawnButton : GameButton
     {
@@ -104,5 +127,13 @@ namespace PegSolitaireGame
         {
             Board.UnSetSelected(emptySelected: false);
         }
+
+        public override char GetChar()
+        {
+            return (char) TypeChar.Selected;
+        }
     }
+    
+    
 }
+

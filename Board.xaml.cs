@@ -16,7 +16,7 @@ namespace PegSolitaireGame
         private SelectedPawnButton? selected = null;
         private readonly List<AvailableField> availableFields = new();
 
-        private State? state;
+        private Stack<State> states = new();
 
         public Board()
         {
@@ -128,6 +128,48 @@ namespace PegSolitaireGame
             }
         }
 
+        public void SaveState(){
+            states.Push(new State(gameMap));
+        }
+
+        public void StepBack()
+        {
+            if (states.Count > 0)
+            {
+                ClearBord();
+                var state = states.Pop();
+                createFromGameMap(state.GetGameMap(this));
+                
+            }
+        }
+
+        private void createFromGameMap(GameButton[,] map)
+        {
+            gameMap = map;
+            for (int row = 0; row < boardSize; row++)
+            {
+                for (int column = 0; column < boardSize; column++)
+                {
+                    GameButton? button = map[row, column];
+                    if(button is null) {continue;}
+                    if (button is SelectedPawnButton selectedButton) { selected = selectedButton;}
+                    if(button is AvailableField availableField) {availableFields.Add(availableField);}
+                    
+                    Grid.SetColumn(button, column);
+                    Grid.SetRow(button, row);
+                    BoardGrid.Children.Add(button);
+
+                }
+            }
+        }
+        private void ClearBord()
+        {
+            gameMap = null;
+            selected = null;
+            availableFields.Clear();
+            BoardGrid.Children.Clear();
+
+        }
         private void SetAvailableFields()
         {
             if (selected == null) return;
@@ -187,21 +229,6 @@ namespace PegSolitaireGame
         {
             return x == 3 && y == 3;
         }
-
-        private void SaveState()
-        {
-            var newState = new State
-            {
-                gameMap = gameMap,
-                selected = selected,
-                availableFields = availableFields,
-                boardSize = boardSize,
-                lastState = state
-            };
-            state = newState;
-        }
-
-
     }
 
 
@@ -221,25 +248,62 @@ namespace PegSolitaireGame
 
     public class State
     {
-        public GameButton[,] gameMap
+        private char[,] stateChars;
+        private int boardSize;
+        public State(GameButton[,] board)
         {
-            set => gameMap = value.Copy();
+            stateChars = makeStateChars(board);
         }
 
-        public int boardSize = 7;
-
-        public SelectedPawnButton? selected
+        private char[,] makeStateChars(GameButton[,] gameMap)
         {
-            set => selected = value.Copy();
+            boardSize = gameMap.GetLength(0);
+            var result = new char[boardSize, boardSize];
+            
+            for (int row = 0; row < boardSize; row++)
+            {
+                for (int column = 0; column < boardSize; column++)
+                {
+                    result[row, column] = gameMap[row, column]?.GetChar() ?? (char) TypeChar.Nothing;
+                }
+            }
+            
+            return result;
         }
-        public List<AvailableField> availableFields
+
+        public GameButton[,] GetGameMap(Board board)
         {
-            set => value.Copy();
+            var gameMap = new GameButton[boardSize, boardSize];
+            for (int row = 0; row < boardSize; row++)
+            {
+                for (int column = 0; column < boardSize; column++)
+                {
+                    gameMap[row, column] = ConvertToGameButton(stateChars[row, column], board);
+                }
+            }
+
+            return gameMap;
         }
 
-        public State? lastState
+        private GameButton? ConvertToGameButton(char serializedType,Board board)
         {
-            set => lastState = value.Copy();
+            TypeChar typeChar = (TypeChar) serializedType;
+
+            switch (typeChar)
+            {
+                case TypeChar.EmptyButton:
+                    return new EmptyField(board);
+                case TypeChar.PawnButton:
+                    return new PawnButton(board);
+                case TypeChar.Selected:
+                    return new SelectedPawnButton(board);
+                case TypeChar.AvailableField:
+                    return new AvailableField(board);
+                case TypeChar.Nothing:
+                    return null;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 
