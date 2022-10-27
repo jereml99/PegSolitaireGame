@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Navigation;
 
 namespace PegSolitaireGame
 {
@@ -17,6 +15,9 @@ namespace PegSolitaireGame
         private int boardSize = 7;
         private SelectedPawnButton? selected = null;
         private readonly List<AvailableField> availableFields = new();
+
+        private State? state;
+
         public Board()
         {
             InitializeComponent();
@@ -48,11 +49,13 @@ namespace PegSolitaireGame
             {
                 for (int column = 0; column < boardSize; column++)
                 {
-                    GameButton button = column is 1 or 0 && row is 1 or 0 ? new PawnButton(this) : new EmptyField(this);
+                    if (!isBoard(row, column)) continue;
+                    GameButton button = !isEmpty(row, column) ? new PawnButton(this) : new EmptyField(this);
                     Grid.SetColumn(button, column);
                     Grid.SetRow(button, row);
                     gameMap[row, column] = button;
                     BoardGrid.Children.Add(button);
+
                 }
             }
         }
@@ -123,20 +126,19 @@ namespace PegSolitaireGame
             {
                 InitButtonMap();
             }
+            else
+            {
+                SaveState();
+            }
         }
 
         private void SetAvailableFields()
         {
-            if (selected != null)
+            if (selected == null) return;
+            var selectedPoint = new Point(Grid.GetRow(selected), Grid.GetColumn(selected));
+            foreach (var direction in Direction.AllDirection().Where(direction => IsAvailable(selectedPoint, direction)))
             {
-                var selectedPoint = new Point(Grid.GetRow(selected), Grid.GetColumn(selected));
-                foreach (var direction in Direction.AllDirection())
-                {
-                    if (IsAvailable(selectedPoint, direction))
-                    {
-                        SetAvailableField(selectedPoint + direction * 2);
-                    }
-                }
+                SetAvailableField(selectedPoint + direction * 2);
             }
         }
 
@@ -178,6 +180,32 @@ namespace PegSolitaireGame
                 ChangeState(field, new EmptyField(this));
             }
         }
+
+        private bool isBoard(int x, int y)
+        {
+            return (x >= 2 && x <= 4) ||
+                   (y >= 2 && y <= 4);
+        }
+
+        private bool isEmpty(int x, int y)
+        {
+            return x == 3 && y == 3;
+        }
+
+        private void SaveState()
+        {
+            var newState = new State
+            {
+                gameMap = gameMap,
+                selected = selected,
+                availableFields = availableFields,
+                boardSize = boardSize,
+                lastState = state
+            };
+            state = newState;
+        }
+
+
     }
 
 
@@ -194,102 +222,29 @@ namespace PegSolitaireGame
         }
 
     }
-    public abstract class GameButton : Button
+
+    public class State
     {
-        protected Board Board;
-
-        protected GameButton(Board board)
+        public GameButton[,] gameMap
         {
-            this.Board = board;
-            Click += board.btn_Click;
-        }
-        public virtual void Paint()
-        {
-            Style = FindResource("Peg") as Style;
+            set => gameMap = value.Copy();
         }
 
-        public virtual void Handle()
+        public int boardSize = 7;
+
+        public SelectedPawnButton? selected
         {
-            return;
+            set => selected = value.Copy();
+        }
+        public List<AvailableField> availableFields
+        {
+            set => value.Copy();
         }
 
-        public Point GetPoint()
+        public State? lastState
         {
-            return new Point(Grid.GetRow(this), Grid.GetColumn(this));
-        }
-
-    }
-    public class EmptyField : GameButton
-    {
-        public EmptyField(Board board) : base(board)
-        {
-            Paint();
-        }
-
-        public sealed override void Paint()
-        { 
-            Background = Brushes.AliceBlue;
-            Style = FindResource("Peg") as Style;
+            set => lastState = value.Copy();
         }
     }
-
-    public class AvailableField : GameButton
-    {
-        public AvailableField(Board board) : base(board)
-        {
-            Paint();
-        }
-
-        public sealed override void Paint()
-        {
-            base.Paint();
-            Background = Brushes.Green;
-
-        }
-
-        public override void Handle()
-        {
-            var newButton = Board.ChangeState(this, new SelectedPawnButton(Board));
-            Board.RemoveBetweenSelectedAnd(newButton);
-            Board.SetSelected(newButton,emptySelected:true);
-            Board.checkIfEnd();
-        }
-    }
-
-    public class PawnButton : GameButton
-    {
-        public PawnButton(Board board) : base(board)
-        {
-            Paint();
-        }
-
-        public sealed override void Paint()
-        {
-            base.Paint();
-            this.Background = Brushes.Gold;
-        }
-
-        public override void Handle()
-        {
-            var newButton = Board.ChangeState(this, new SelectedPawnButton(Board));
-            Board.SetSelected(newButton);
-        }
-    }
-    public class SelectedPawnButton : GameButton
-    {
-        public SelectedPawnButton(Board board) : base(board) { Paint(); }
-
-        public sealed override void Paint()
-        {
-            base.Paint();
-            this.Background = Brushes.Red;
-        }
-
-        public override void Handle()
-        {
-            Board.UnSetSelected(emptySelected:false);
-        }
-    }
-
 
 }
