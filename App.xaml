@@ -4,6 +4,11 @@
              xmlns:local="clr-namespace:PegSolitaireGame"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <ResourceDictionary Source="RoundButton.xaml"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="RoundButton.xaml"/>
+                <ResourceDictionary Source="TextAnimation.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

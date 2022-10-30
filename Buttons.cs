@@ -81,7 +81,7 @@ namespace PegSolitaireGame
             var newButton = Board.ChangeState(this, new SelectedPawnButton(Board));
             Board.RemoveBetweenSelectedAnd(newButton);
             Board.SetSelected(newButton, emptySelected: true);
-            Board.checkIfEnd();
+            Board.CheckIfEnd();
         }
 
         public override char GetChar()

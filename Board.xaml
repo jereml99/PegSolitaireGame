@@ -5,7 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PegSolitaireGame"
              mc:Ignorable="d" 
+             
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Name="BoardGrid">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="1" x:Name="BoardGrid"></Grid>
+        
+        <TextBlock Grid.Row="0" x:Name="EndGameText" HorizontalAlignment="Center" Visibility="Hidden" Style="{StaticResource EndGameAnimation}"/>
     </Grid>
 </UserControl>

@@ -15,6 +15,7 @@ namespace PegSolitaireGame
         private GameButton[,] gameMap;
         private int boardSize = 7;
         private SelectedPawnButton? selected = null;
+
         private readonly List<AvailableField> availableFields = new();
 
         private Stack<State> states = new();
@@ -50,8 +51,8 @@ namespace PegSolitaireGame
             {
                 for (int column = 0; column < boardSize; column++)
                 {
-                    if (!isBoard(row, column)) continue;
-                    GameButton button = !isEmpty(row, column) ? new PawnButton(this) : new EmptyField(this);
+                    if (!IsBoard(row, column)) continue;
+                    GameButton button = !IsEmpty(row, column) ? new PawnButton(this) : new EmptyField(this);
                     Grid.SetColumn(button, column);
                     Grid.SetRow(button, row);
                     gameMap[row, column] = button;
@@ -115,7 +116,7 @@ namespace PegSolitaireGame
             ChangeState(pawnToRemove, new EmptyField(this));
         }
 
-        public void checkIfEnd()
+        public void CheckIfEnd()
         {
             var isAnyMoveAvailable = gameMap
                 .Cast<GameButton>()
@@ -125,10 +126,19 @@ namespace PegSolitaireGame
 
             if (!isAnyMoveAvailable)
             {
+                EndGameText.Text = GameIsWinned() ? FindResource("WinText").ToString() : FindResource("LoseText").ToString();
+                EndGameText.Visibility = Visibility.Visible;
+                MessageBox.Show("Game ended");
                 InitButtonMap();
+                EndGameText.Visibility = Visibility.Hidden;
             }
         }
 
+        private bool GameIsWinned()
+        {
+            return gameMap
+                .Cast<GameButton>().Count(button => button is PawnButton or SelectedPawnButton) == 1;
+        }
         public void SaveState(){
             states.Push(new State(gameMap));
         }
@@ -139,7 +149,7 @@ namespace PegSolitaireGame
             {
                 ClearBord();
                 var state = states.Pop();
-                createFromGameMap(state.GetGameMap(this));
+                CreateFromGameMap(state.GetGameMap(this));
                 
             }
         }
@@ -149,7 +159,7 @@ namespace PegSolitaireGame
             return states.Count > 0;
         }
 
-        private void createFromGameMap(GameButton[,] map)
+        private void CreateFromGameMap(GameButton[,] map)
         {
             gameMap = map;
             for (int row = 0; row < boardSize; row++)
@@ -225,13 +235,13 @@ namespace PegSolitaireGame
             }
         }
 
-        private bool isBoard(int x, int y)
+        private bool IsBoard(int x, int y)
         {
             return (x >= 2 && x <= 4) ||
                    (y >= 2 && y <= 4);
         }
 
-        private bool isEmpty(int x, int y)
+        private bool IsEmpty(int x, int y)
         {
             return x == 3 && y == 3;
         }
