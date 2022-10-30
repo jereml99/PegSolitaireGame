@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace PegSolitaireGame
     public abstract class GameButton : Button
     {
         protected Board Board;
+        
         protected GameButton(Board board)
         {
             this.Board = board;
@@ -71,7 +73,6 @@ namespace PegSolitaireGame
         {
             base.Paint();
             Background = Brushes.Green;
-
         }
 
         public override void Handle()
