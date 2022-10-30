@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace PegSolitaireGame
 {
@@ -131,16 +132,21 @@ namespace PegSolitaireGame
         public void SaveState(){
             states.Push(new State(gameMap));
         }
-
+        
         public void StepBack()
         {
-            if (states.Count > 0)
+            if (CanStepBack())
             {
                 ClearBord();
                 var state = states.Pop();
                 createFromGameMap(state.GetGameMap(this));
                 
             }
+        }
+
+        public bool CanStepBack()
+        {
+            return states.Count > 0;
         }
 
         private void createFromGameMap(GameButton[,] map)

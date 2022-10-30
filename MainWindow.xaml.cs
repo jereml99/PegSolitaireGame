@@ -32,5 +32,10 @@ namespace PegSolitaireGame
         {
             MyBoard.StepBack();
         }
+
+        private void OnCanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+           e.CanExecute = MyBoard.CanStepBack();
+        }
     }
 }
