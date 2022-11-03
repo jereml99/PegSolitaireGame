@@ -14,6 +14,6 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="1" x:Name="BoardGrid"></Grid>
         
-        <TextBlock Grid.Row="0" x:Name="EndGameText" HorizontalAlignment="Center" Visibility="Hidden" Style="{StaticResource EndGameAnimation}"/>
+        <TextBlock Grid.Row="0" x:Name="EndGameText" HorizontalAlignment="Center" Visibility="Hidden" Style="{StaticResource EndGameAnimation}" FontSize="32"/>
     </Grid>
 </UserControl>
